@@ -236,6 +236,69 @@ function applyAppearance() {
   document.documentElement.style.setProperty('--bubble-max-h', Math.round(window.innerHeight * ratio) + 'px')
 }
 
+// ---- 装扮层：按分类选好的装扮（头饰/眼镜/道具…）持续生效 ----
+// Cubism 一次只能应用一个表情，所以装扮不走 expression，而是把选中的 exp3 参数
+// 合并起来，每帧覆盖写一遍，这样不会被动作或表情冲掉。
+let outfitDefs = []
+let outfitLabels = []
+
+async function loadOutfit() {
+  outfitDefs = []
+  outfitLabels = []
+  const o = (cfg && cfg.outfit) || {}
+  const cats = o.categories || {}
+  const sel = o.selected || {}
+  const picks = []
+  for (const key of Object.keys(cats)) {
+    const label = sel[key]
+    if (label) picks.push(label)
+  }
+  for (const label of picks) {
+    const e = (manifest && manifest.expressions || []).find((x) => x.label === label)
+    if (!e) continue
+    try {
+      const res = await fetch('../assets/model/' + e.file)
+      const json = await res.json()
+      for (const p of json.Parameters || []) {
+        if (!p || !p.Id) continue
+        outfitDefs.push({ id: p.Id, value: p.Value })
+      }
+      outfitLabels.push(label)
+    } catch (err) {
+      console.log('[pet] 装扮载入失败 ' + label + '：' + (err && err.message))
+    }
+  }
+  console.log('[pet] 装扮：' + (outfitLabels.join('、') || '（无）') + '，参数 ' + outfitDefs.length + ' 条')
+}
+
+function applyOutfitParams() {
+  if (!outfitDefs.length || !model) return
+  try {
+    const core = model.internalModel.coreModel
+    for (const d of outfitDefs) {
+      const idx = core.getParameterIndex ? core.getParameterIndex(d.id) : -1
+      if (idx >= 0) core.setParameterValueByIndex(idx, d.value, 1)
+    }
+  } catch (_) {}
+}
+
+// 调试/随机装扮用：直接传一组装扮名
+window.__setOutfit = async (labels) => {
+  if (!cfg) return 'cfg 未就绪'
+  const cats = (cfg.outfit && cfg.outfit.categories) || {}
+  const sel = {}
+  for (const key of Object.keys(cats)) sel[key] = null
+  for (const label of labels || []) {
+    for (const key of Object.keys(cats)) {
+      if ((cats[key].items || []).indexOf(label) >= 0) sel[key] = label
+    }
+  }
+  cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
+  await loadOutfit()
+  return outfitLabels.join('、')
+}
+window.__outfitInfo = () => ({ labels: outfitLabels, params: outfitDefs.length })
+
 function layout(force) {
   if (!model || !pixiApp) return
   window.__layoutCalls = (window.__layoutCalls || 0) + 1
@@ -366,6 +429,10 @@ async function boot() {
   layout(true)
   window.addEventListener('resize', () => layout())
 
+  // 装扮：先载入选中的装扮参数，再挂到每帧循环上持续生效
+  await loadOutfit()
+  pixiApp.ticker.add(applyOutfitParams)
+
   if (model.internalModel && model.internalModel.motionManager) {
     try { model.internalModel.motionManager.groups.idle = 'Idle' } catch (_) {}
   }
@@ -444,6 +511,11 @@ function setupChat() {
   window.pet.onAssistantStatus((st) => {
     if (st && st.busy) setChatBusy(true)
     else setChatBusy(false)
+  })
+  // 主进程换了装扮（随机的 / 设置窗改的）→ 重新载入
+  window.pet.onOutfit(async (sel) => {
+    cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
+    await loadOutfit()
   })
 }
 

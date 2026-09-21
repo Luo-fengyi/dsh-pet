@@ -24,6 +24,12 @@ contextBridge.exposeInMainWorld('pet', {
   onChatReply: (cb) => ipcRenderer.on('pet:chat-reply', (_e, payload) => cb(payload)),
   onAssistantStatus: (cb) => ipcRenderer.on('pet:assistant-status', (_e, payload) => cb(payload)),
 
+  // 装扮
+  outfitRandom: () => ipcRenderer.invoke('pet:outfit-random'),
+  outfitReset: () => ipcRenderer.invoke('pet:outfit-reset'),
+  outfitSet: (sel) => ipcRenderer.invoke('pet:outfit-set', sel),
+  onOutfit: (cb) => ipcRenderer.on('pet:outfit', (_e, payload) => cb(payload)),
+
   // 设置窗
   settingsGet: () => ipcRenderer.invoke('pet:settings-get'),
   settingsSave: (patch) => ipcRenderer.invoke('pet:settings-save', patch),

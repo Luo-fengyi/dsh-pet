@@ -5,6 +5,7 @@ const path = require('node:path')
 const { StatusWatcher } = require('./src/status-watcher')
 const { Assistant } = require('./src/assistant')
 const store = require('./src/settings-store')
+const outfitMod = require('./src/outfit')
 
 const ROOT = __dirname
 const CONFIG_PATH = path.join(ROOT, 'config.json')
@@ -18,7 +19,7 @@ if (process.env.DSPET_USERDATA) app.setPath('userData', process.env.DSPET_USERDA
 // 调试运行时不要动用户的 config.json
 const DEBUG_RUN = !!(process.env.DSPET_SNAP || process.env.DSPET_DEMO || process.env.DSPET_DRAGTEST ||
   process.env.DSPET_INPUTTEST || process.env.DSPET_CURSORTEST || process.env.DSPET_IDLEWATCH ||
-  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST || process.env.DSPET_CHATBOX_TEST)
+  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST || process.env.DSPET_CHATBOX_TEST || process.env.DSPET_OUTFIT_TEST)
 
 function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
@@ -155,6 +156,33 @@ function setupDebug() {
       } catch (e) { appendLog('[settingstest] 失败 ' + e.message) }
       app.quit()
     }, 8000)
+    return
+  }
+
+  // DSPET_OUTFIT_TEST=<目录> [+ DSPET_OUTFIT_PICKS=装扮1,装扮2]：验证装扮能否叠加、会不会被动作冲掉
+  if (process.env.DSPET_OUTFIT_TEST) {
+    const outDir = process.env.DSPET_OUTFIT_TEST
+    const picks = String(process.env.DSPET_OUTFIT_PICKS || '').split(',').map((s) => s.trim()).filter(Boolean)
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+    setTimeout(async () => {
+      try {
+        fs.mkdirSync(outDir, { recursive: true })
+        fs.writeFileSync(path.join(outDir, 'o0-before.png'), (await win.webContents.capturePage()).toPNG())
+        if (picks.length) {
+          const r = await win.webContents.executeJavaScript('window.__setOutfit(' + JSON.stringify(picks) + ')')
+          appendLog('[outfit] 套用：' + r)
+        }
+        await sleep(1000)
+        fs.writeFileSync(path.join(outDir, 'o1-applied.png'), (await win.webContents.capturePage()).toPNG())
+        await sleep(4000)
+        fs.writeFileSync(path.join(outDir, 'o2-after4s.png'), (await win.webContents.capturePage()).toPNG())
+        appendLog('[outfit] 状态：' + await win.webContents.executeJavaScript('JSON.stringify(window.__outfitInfo ? window.__outfitInfo() : null)'))
+        try { await win.webContents.executeJavaScript('window.__eggNow && window.__eggNow()') } catch (_) {}
+        await sleep(1500)
+        fs.writeFileSync(path.join(outDir, 'o3-afterMotion.png'), (await win.webContents.capturePage()).toPNG())
+      } catch (e) { appendLog('[outfit] 失败 ' + e.message) }
+      app.quit()
+    }, 9000)
     return
   }
 
@@ -450,6 +478,8 @@ function buildMenu() {
     { type: 'separator' },
     { label: '看一眼桌面', click: () => { if (assistant) assistant.lookNow('manual') } },
     { label: '新开会话', click: () => { if (assistant) assistant.newSession() } },
+    { label: '随机换装扮', click: () => applyOutfit(outfitMod.randomOutfit(cfg), '随机装扮') },
+    { label: '恢复默认装扮', click: () => applyOutfit(outfitMod.emptyOutfit(cfg), '恢复默认') },
     { label: '设置…', click: () => openSettings() },
     { type: 'separator' },
     { label: '重新加载模型', click: () => { if (win) win.webContents.reload() } },
@@ -466,6 +496,15 @@ function buildMenu() {
     callback: () => appendLog('[menu] closed after ' + (Date.now() - t0) + 'ms'),
   })
   appendLog('[menu] opened')
+}
+
+// 换装扮：写盘 + 通知渲染端
+function applyOutfit(sel, how) {
+  store.mergeConfig(ROOT, { outfit: { selected: sel } })
+  cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
+  if (win && !win.isDestroyed()) win.webContents.send('pet:outfit', sel)
+  appendLog('[outfit] ' + how + '：' + outfitMod.describe(sel))
+  return sel
 }
 
 function applySize(scale) {
@@ -523,6 +562,14 @@ app.whenReady().then(() => {
     cfg.watch = Object.assign({}, cfg.watch, { sessionsRoot: path.join(home, 'sessions') })
   }
   baseSize = { w: cfg.window.width, h: cfg.window.height }
+
+  // 装扮：开着「启动随机」就每次开机随机一套，关掉则沿用上次存下来的
+  if (cfg.outfit && cfg.outfit.startupRandom !== false) {
+    const sel = outfitMod.randomOutfit(cfg)
+    store.mergeConfig(ROOT, { outfit: { selected: sel } })
+    cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
+    appendLog('[outfit] 启动随机装扮：' + outfitMod.describe(sel))
+  }
   applyStateToConfig()
   trimLog()
   createWindow()
@@ -559,6 +606,11 @@ app.whenReady().then(() => {
     return true
   })
   ipcMain.handle('pet:chat-history', () => (assistant ? assistant.chat.readable() : []))
+
+  // ---- 装扮 ----
+  ipcMain.handle('pet:outfit-random', () => applyOutfit(outfitMod.randomOutfit(cfg), '随机装扮'))
+  ipcMain.handle('pet:outfit-reset', () => applyOutfit(outfitMod.emptyOutfit(cfg), '恢复默认'))
+  ipcMain.handle('pet:outfit-set', (_e, sel) => applyOutfit(sel || {}, '手动指定'))
 
   // ---- 设置窗 ----
   ipcMain.on('pet:settings-open', () => openSettings())

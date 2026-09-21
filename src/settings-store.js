@@ -79,6 +79,11 @@ function publicSettings(root) {
       topRefreshMs: (cfg.window && typeof cfg.window.topRefreshMs === 'number') ? cfg.window.topRefreshMs : 2000,
     },
     memory: { enabled: !(cfg.memory && cfg.memory.enabled === false) },
+    outfit: {
+      startupRandom: !(cfg.outfit && cfg.outfit.startupRandom === false),
+      categories: (cfg.outfit && cfg.outfit.categories) || {},
+      selected: (cfg.outfit && cfg.outfit.selected) || {},
+    },
     hasKey: !!(sec.apiKey && String(sec.apiKey).trim()),
     keyTail: sec.apiKey ? String(sec.apiKey).slice(-4) : '',
   }
@@ -86,7 +91,7 @@ function publicSettings(root) {
 
 function saveSettings(root, patch) {
   const cfgPatch = {}
-  for (const section of ['vision', 'chat', 'memory']) {
+  for (const section of ['vision', 'chat', 'memory', 'outfit']) {
     if (patch[section]) cfgPatch[section] = Object.assign({}, patch[section])
   }
   // 外观三段映射回 bubble / chat

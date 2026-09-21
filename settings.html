@@ -74,6 +74,7 @@
     <button data-tab="screen">看屏幕</button>
     <button data-tab="chat">对话</button>
     <button data-tab="look">外观</button>
+    <button data-tab="outfit">装扮</button>
     <button data-tab="history">历史</button>
   </nav>
 
@@ -183,8 +184,29 @@
       </section>
     </div>
 
-    <div class="panel" id="panel-history">
+    <div class="panel" id="panel-outfit">
       <section>
+        <h2>装扮</h2>
+        <div class="row">
+          <label>启动时随机</label>
+          <div class="ctl"><label class="check"><input id="outfitRandom" type="checkbox" /> 每次启动随机换一套（关掉就用上次这套）</label></div>
+        </div>
+        <div class="row">
+          <label></label>
+          <div class="ctl">
+            <button id="outfitRoll">🎲 随机一套（立刻换）</button>
+            <button id="outfitClear">恢复默认（不装扮）</button>
+          </div>
+        </div>
+        <div class="hint">下面是各分类，可以各挑一件，组合起来用；改完点「保存」生效。「随机一套」会立刻换装，不用保存。</div>
+      </section>
+      <section>
+        <h2>各分类挑选</h2>
+        <div id="outfitCats"><div class="empty">（读取中…）</div></div>
+      </section>
+    </div>
+
+    <div class="panel" id="panel-history">      <section>
         <h2>聊天历史</h2>
         <div class="row"><label></label><div class="ctl">
           <button id="refreshHistory">刷新</button>

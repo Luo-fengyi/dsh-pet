@@ -9,6 +9,8 @@ _tools/net.txt
 _tools/*_result.txt
 _tools/*.png
 _tools/*.jpg
+_tools/outfit/
+_tools/expressions_analysis.txt
 *.info.txt
 _release/
 
