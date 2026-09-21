@@ -4,6 +4,10 @@
 
 Windows / Electron / 纯本地运行，不依赖任何云服务（除了你自己配的模型接口）。
 
+> **默认适配的模型**：B 站 UP 主 **氵六青** 发布的 DS娘模型
+> （[视频地址](https://www.bilibili.com/video/BV16yYi69EQT/)）。
+> 模型版权归原作者所有，本仓库只做资源整理与程序适配，**不随仓库分发模型文件**。
+
 ---
 
 ## 功能
@@ -59,19 +63,23 @@ node _tools/fetch_electron.js
 
 ### 2. 准备模型
 
-本项目**不带模型**（模型是各自作者的作品）。你需要自备一个 Live2D Cubism 4 模型（用 VTube Studio 导出的那套文件也行）。
+本项目**不带模型**（模型版权归各作者所有）。你需要自备一个 Live2D Cubism 4 模型。
 
-把模型文件夹放到本项目**上一级**的 `DS` 目录，然后：
+**默认适配的模型**是 B 站 UP 主 **氵六青** 制作的 DS娘模型
+（[视频地址](https://www.bilibili.com/video/BV16yYi69EQT/)）——就是那种 VTube Studio 导出的结构：
+一个 `.moc3`、几张贴图、一个 `motions/` 动作目录、外加一堆中文名的 `.exp3.json` 表情。
+如果你用的就是这套，把它整个文件夹放到本项目**上一级**并命名为 `DS`，然后：
 
 ```bash
 node _tools/build_assets.js
 ```
 
-它会自动扫描 `DS` 里的 `.moc3`、贴图、`.exp3.json`（表情）、`.motion3.json`（动作），
-整理进 `assets/model/`，并生成一个登记了全部动作和表情的 `ds-pet.model3.json`。
+脚本会自动扫描 `DS` 里的 `.moc3`、贴图、`.exp3.json`（表情）、`.motion3.json`（动作），
+整理进 `assets/model/`，并生成一个登记了全部动作与表情的 `ds-pet.model3.json`
+（原模型的 `model3.json` 通常不登记动作和表情，必须补这一步）。
 
-> 目前默认适配"一个 moc3 + `motions/` 子目录 + 一堆中文名 exp3"这种 VTube Studio 导出结构。
-> 其他结构请按需修改 `_tools/build_assets.js` 顶部的文件映射。
+> 换成别的模型也可以，脚本顶部有文件名映射表，按你的结构改一下即可。
+> 目前脚本里写死的动作文件名（`喷水`、`开盖`、`番茄酱` 等）就是按上面那套模型来的。
 
 ### 3. 下载 Live2D Cubism Core
 
@@ -172,6 +180,15 @@ dsh-pet/
 或把间隔调大、阈值调高。她也会把认为重要的事写进 `memory.txt`，可以随时清空。
 
 ---
+
+## 致谢
+
+- **模型**：DS娘模型由 B 站 UP 主 [氵六青](https://www.bilibili.com/video/BV16yYi69EQT/) 制作并公开分享，
+  版权归原作者所有。本项目的资源整理脚本默认按其发布的结构适配；模型文件不随仓库分发，
+  使用与再分发请以原作者的说明为准。若你把这个模型用在自己的项目里，记得署名原作者。
+- **渲染**：[Live2D Cubism SDK](https://www.live2d.com/)（Core 需按官方条款自行下载）、
+  [PIXI.js](https://pixijs.com/)、[pixi-live2d-display](https://github.com/guansss/pixi-live2d-display)
+- **桌面外壳**：[Electron](https://www.electronjs.org/)
 
 ## 声明
 
