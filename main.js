@@ -18,7 +18,7 @@ if (process.env.DSPET_USERDATA) app.setPath('userData', process.env.DSPET_USERDA
 // 调试运行时不要动用户的 config.json
 const DEBUG_RUN = !!(process.env.DSPET_SNAP || process.env.DSPET_DEMO || process.env.DSPET_DRAGTEST ||
   process.env.DSPET_INPUTTEST || process.env.DSPET_CURSORTEST || process.env.DSPET_IDLEWATCH ||
-  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST)
+  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST || process.env.DSPET_CHATBOX_TEST)
 
 function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
@@ -155,6 +155,23 @@ function setupDebug() {
       } catch (e) { appendLog('[settingstest] 失败 ' + e.message) }
       app.quit()
     }, 8000)
+    return
+  }
+
+  // DSPET_CHATBOX_TEST=<png路径>：先拍一张（输入框应隐形），再强制显示拍一张
+  if (process.env.DSPET_CHATBOX_TEST) {
+    const out = process.env.DSPET_CHATBOX_TEST
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+    setTimeout(async () => {
+      try { fs.writeFileSync(out.replace(/\.png$/, '-idle.png'), (await win.webContents.capturePage()).toPNG()) } catch (_) {}
+      try {
+        await win.webContents.executeJavaScript("document.getElementById('chatbox').classList.add('active')")
+        await sleep(500)
+        fs.writeFileSync(out, (await win.webContents.capturePage()).toPNG())
+      } catch (_) {}
+      appendLog('[chatbox] 两张图已保存')
+      app.quit()
+    }, 9000)
     return
   }
 

@@ -80,16 +80,16 @@ body.dragging { cursor: grabbing; }
 
 .hint.hidden { display: none; }
 
-/* 回复框：平时半透明，鼠标移上去才明显 */
+/* 回复框：贴在窗口下半部分，平时完全隐形，鼠标移过去才浮出来 */
 #chatbox {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 66px;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
   display: flex;
   gap: 6px;
   z-index: 12;
-  opacity: 0.34;
+  opacity: 0;
   transition: opacity 0.18s ease;
 }
 
@@ -101,25 +101,27 @@ body.dragging { cursor: grabbing; }
   min-width: 0;
   padding: 6px 11px;
   border-radius: 13px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.55);
   color: #22303c;
   font: 12px/1.4 "Microsoft YaHei", "Segoe UI", sans-serif;
   outline: none;
+  backdrop-filter: blur(2px);
 }
 
-#chat-input:focus { background: #fff; border-color: rgba(80, 140, 220, 0.9); }
+#chat-input::placeholder { color: rgba(34, 48, 60, 0.55); }
+#chat-input:focus { background: rgba(255, 255, 255, 0.92); border-color: rgba(80, 140, 220, 0.9); }
 #chat-input:disabled { color: #7a8896; }
 
 #chat-send {
   border: 0;
   border-radius: 13px;
   padding: 0 12px;
-  background: rgba(80, 140, 220, 0.92);
+  background: rgba(80, 140, 220, 0.72);
   color: #fff;
   font-size: 13px;
   cursor: pointer;
 }
 
-#chat-send:hover { background: rgba(70, 126, 205, 1); }
+#chat-send:hover { background: rgba(70, 126, 205, 0.95); }
 #chat-send:disabled { opacity: 0.5; cursor: default; }
