@@ -55,6 +55,10 @@ function fill(s) {
   $('bubbleFontSize').value = a.bubbleFontSize || 13
   $('bubbleMaxRatio').value = a.bubbleMaxRatio || 0.58
   $('chatFontSize').value = a.chatFontSize || 12
+  $('msPerChar').value = a.msPerChar || 200
+  $('bubbleMinSec').value = Math.round((a.bubbleMinMs || 6000) / 1000)
+  $('bubbleMaxSec').value = Math.round((a.bubbleMaxMs || 40000) / 1000)
+  $('topRefreshMs').value = a.topRefreshMs === undefined ? 2000 : a.topRefreshMs
 }
 
 function collect() {
@@ -91,6 +95,10 @@ function collect() {
       bubbleFontSize: num('bubbleFontSize', 13),
       bubbleMaxRatio: num('bubbleMaxRatio', 0.58),
       chatFontSize: num('chatFontSize', 12),
+      msPerChar: num('msPerChar', 200),
+      bubbleMinMs: Math.max(1, num('bubbleMinSec', 6)) * 1000,
+      bubbleMaxMs: Math.max(2, num('bubbleMaxSec', 40)) * 1000,
+      topRefreshMs: Math.max(0, num('topRefreshMs', 2000)),
     },
   }
 }

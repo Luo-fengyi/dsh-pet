@@ -165,7 +165,21 @@
         <div class="row"><label>气泡字号</label><div class="ctl"><input id="bubbleFontSize" type="number" min="9" max="30" step="1" style="width:110px" /> <span class="hint" style="margin:0">px（默认 13）</span></div></div>
         <div class="row"><label>气泡最大高度</label><div class="ctl"><input id="bubbleMaxRatio" type="number" min="0.2" max="0.85" step="0.02" style="width:110px" /> <span class="hint" style="margin:0">占窗口高度比例（默认 0.58）</span></div></div>
         <div class="row"><label>回复框字号</label><div class="ctl"><input id="chatFontSize" type="number" min="9" max="24" step="1" style="width:110px" /> <span class="hint" style="margin:0">px（默认 12）</span></div></div>
-        <div class="hint">气泡停留时间会随内容自动变长（约每 10 个字 1 秒，最短 6 秒、最长 40 秒）。</div>
+      </section>
+      <section>
+        <h2>气泡停留时间</h2>
+        <div class="row"><label>每个字</label><div class="ctl"><input id="msPerChar" type="number" min="30" max="2000" step="10" style="width:110px" /> <span class="hint" style="margin:0">毫秒（默认 200 = 每 10 个字 2 秒）</span></div></div>
+        <div class="row"><label>最短 / 最长</label><div class="ctl">
+          <input id="bubbleMinSec" type="number" min="1" max="120" step="1" style="width:100px" />
+          <input id="bubbleMaxSec" type="number" min="2" max="600" step="5" style="width:100px" />
+          <span class="hint" style="margin:0">秒（默认 6 / 40）</span>
+        </div></div>
+        <div class="hint">实际停留 = 字数 × 每个字毫秒，再夹在最短和最长之间。嫌读不完就把“每个字”调大。</div>
+      </section>
+      <section>
+        <h2>窗口</h2>
+        <div class="row"><label>置顶刷新间隔</label><div class="ctl"><input id="topRefreshMs" type="number" min="0" max="60000" step="500" style="width:110px" /> <span class="hint" style="margin:0">毫秒，0 = 不自动刷新（只在失焦时恢复）</span></div></div>
+        <div class="hint">Windows 上被全屏窗口盖过一次之后 topmost 会失效，所以需要隔一段时间重新置顶一次。</div>
       </section>
     </div>
 

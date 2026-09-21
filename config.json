@@ -6,6 +6,7 @@
     "x": null,
     "y": null,
     "alwaysOnTop": true,
+    "topRefreshMs": 2000,
     "opacity": 1
   },
   "watch": {
@@ -18,7 +19,10 @@
     "enabled": true,
     "durationMs": 5000,
     "fontSize": 13,
-    "maxHeightRatio": 0.58
+    "maxHeightRatio": 0.58,
+    "msPerChar": 200,
+    "minMs": 6000,
+    "maxMs": 40000
   },
   "easterEgg": {
     "enabled": true,

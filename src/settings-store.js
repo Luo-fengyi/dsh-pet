@@ -73,6 +73,10 @@ function publicSettings(root) {
       bubbleFontSize: (cfg.bubble && cfg.bubble.fontSize) || 13,
       bubbleMaxRatio: (cfg.bubble && cfg.bubble.maxHeightRatio) || 0.58,
       chatFontSize: (cfg.chat && cfg.chat.fontSize) || 12,
+      msPerChar: (cfg.bubble && cfg.bubble.msPerChar) || 200,
+      bubbleMinMs: (cfg.bubble && cfg.bubble.minMs) || 6000,
+      bubbleMaxMs: (cfg.bubble && cfg.bubble.maxMs) || 40000,
+      topRefreshMs: (cfg.window && typeof cfg.window.topRefreshMs === 'number') ? cfg.window.topRefreshMs : 2000,
     },
     memory: { enabled: !(cfg.memory && cfg.memory.enabled === false) },
     hasKey: !!(sec.apiKey && String(sec.apiKey).trim()),
@@ -88,13 +92,25 @@ function saveSettings(root, patch) {
   // 外观三段映射回 bubble / chat
   if (patch.appearance) {
     const a = patch.appearance
+    const clamp = (v, lo, hi, dflt) => {
+      const n = Number(v)
+      return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt
+    }
     cfgPatch.bubble = Object.assign({}, cfgPatch.bubble, {
-      fontSize: Math.min(30, Math.max(9, Number(a.bubbleFontSize) || 13)),
-      maxHeightRatio: Math.min(0.85, Math.max(0.2, Number(a.bubbleMaxRatio) || 0.58)),
+      fontSize: clamp(a.bubbleFontSize, 9, 30, 13),
+      maxHeightRatio: clamp(a.bubbleMaxRatio, 0.2, 0.85, 0.58),
+      msPerChar: clamp(a.msPerChar, 30, 2000, 200),
+      minMs: clamp(a.bubbleMinMs, 1000, 120000, 6000),
+      maxMs: clamp(a.bubbleMaxMs, 2000, 600000, 40000),
     })
     cfgPatch.chat = Object.assign({}, cfgPatch.chat, {
-      fontSize: Math.min(24, Math.max(9, Number(a.chatFontSize) || 12)),
+      fontSize: clamp(a.chatFontSize, 9, 24, 12),
     })
+    if (a.topRefreshMs !== undefined) {
+      cfgPatch.window = Object.assign({}, cfgPatch.window, {
+        topRefreshMs: clamp(a.topRefreshMs, 0, 60000, 2000),
+      })
+    }
   }
   // apiKey 不进 config.json
   if (cfgPatch.vision && cfgPatch.vision.apiKey !== undefined) delete cfgPatch.vision.apiKey

@@ -370,10 +370,12 @@ function createWindow() {
     if (cfg.window.alwaysOnTop === false) return
     try { win.setAlwaysOnTop(true, 'screen-saver') } catch (_) {}
   }
-  const topTimer = setInterval(keepTop, 1500)
+  // 刷新间隔可配（window.topRefreshMs，默认 2 秒）；设为 0 则只在失焦时刷新
+  const refreshMs = Number(cfg.window.topRefreshMs)
+  const topTimer = refreshMs > 0 ? setInterval(keepTop, Math.max(500, refreshMs)) : null
   win.on('blur', keepTop)
   win.on('show', keepTop)
-  win.on('closed', () => clearInterval(topTimer))
+  win.on('closed', () => { if (topTimer) clearInterval(topTimer) })
   win.loadFile(path.join(ROOT, 'renderer', 'index.html'))
   win.once('ready-to-show', () => {
     // 兜底把尺寸钉回设计值，防止创建时被边框补偿撑大

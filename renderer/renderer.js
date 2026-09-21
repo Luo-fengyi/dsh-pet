@@ -48,9 +48,12 @@ function showBubble(text, ms) {
   el.bubble.classList.remove('hidden')
   el.bubble.classList.add('show')
   if (bubbleTimer) clearTimeout(bubbleTimer)
-  // 内容越长停得越久：每 10 个字约 1 秒，最短 6 秒，最长 40 秒
-  const byLength = Math.round(say.length * 110)
-  const life = ms || Math.min(40000, Math.max(6000, byLength))
+  // 停留时间 = 字数 × 每字毫秒，再夹在最短/最长之间（都可在设置里改）
+  const b = (cfg && cfg.bubble) || {}
+  const perChar = Number(b.msPerChar) > 0 ? Number(b.msPerChar) : 200
+  const minMs = Number(b.minMs) > 0 ? Number(b.minMs) : 6000
+  const maxMs = Number(b.maxMs) > 0 ? Number(b.maxMs) : 40000
+  const life = ms || Math.min(maxMs, Math.max(minMs, Math.round(say.length * perChar)))
   bubbleTimer = setTimeout(() => {
     el.bubble.classList.remove('show')
     setTimeout(() => el.bubble.classList.add('hidden'), 240)
