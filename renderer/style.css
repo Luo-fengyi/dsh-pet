@@ -1,0 +1,125 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+body.dragging { cursor: grabbing; }
+
+#stage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.bubble {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  max-width: 92%;
+  max-height: var(--bubble-max-h, 112px);
+  overflow: hidden;
+  padding: 7px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #22303c;
+  font: 13px/1.45 "Microsoft YaHei", "Segoe UI", sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  text-align: center;
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  z-index: 14;
+}
+
+/* 气泡在说话时，让回复框几乎隐形，免得两者叠在一起看不清 */
+.bubble.show ~ #chatbox { opacity: 0.1; }
+
+.bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  margin-left: -7px;
+  border: 7px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.94);
+  border-bottom: 0;
+}
+
+.bubble.hidden { display: none; }
+
+.hint {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font: 12px/1.4 Consolas, "Microsoft YaHei", monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  z-index: 20;
+}
+
+.hint.hidden { display: none; }
+
+/* 回复框：平时半透明，鼠标移上去才明显 */
+#chatbox {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 66px;
+  display: flex;
+  gap: 6px;
+  z-index: 12;
+  opacity: 0.34;
+  transition: opacity 0.18s ease;
+}
+
+#chatbox:hover,
+#chatbox.active { opacity: 1; }
+
+#chat-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 11px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.8);
+  color: #22303c;
+  font: 12px/1.4 "Microsoft YaHei", "Segoe UI", sans-serif;
+  outline: none;
+}
+
+#chat-input:focus { background: #fff; border-color: rgba(80, 140, 220, 0.9); }
+#chat-input:disabled { color: #7a8896; }
+
+#chat-send {
+  border: 0;
+  border-radius: 13px;
+  padding: 0 12px;
+  background: rgba(80, 140, 220, 0.92);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#chat-send:hover { background: rgba(70, 126, 205, 1); }
+#chat-send:disabled { opacity: 0.5; cursor: default; }

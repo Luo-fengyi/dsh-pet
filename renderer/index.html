@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: file:; img-src 'self' data: file:; connect-src 'self' file: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' file:" />
+  <title>DS娘桌宠</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="bubble" class="bubble hidden"><span id="bubble-text"></span></div>
+  <canvas id="stage"></canvas>
+  <div id="chatbox">
+    <input id="chat-input" type="text" placeholder="跟我说点什么…" maxlength="300" autocomplete="off" spellcheck="false" />
+    <button id="chat-send" title="发送（回车）">↵</button>
+  </div>
+  <div id="hint" class="hint hidden"></div>
+
+  <!-- 顺序不能改：先 Cubism Core，再 PIXI，最后 pixi-live2d-display -->
+  <script src="../vendor/live2dcubismcore.min.js"></script>
+  <script src="../vendor/pixi.min.js"></script>
+  <script src="../vendor/pixi-live2d-display-cubism4.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

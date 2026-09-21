@@ -1,0 +1,29 @@
+# 运行时产物（每台机器各不相同，不要提交）
+window-state.json
+chat-state.json
+memory.txt
+secrets.json
+pet.log
+_test_ud/
+_tools/net.txt
+_tools/*_result.txt
+_tools/*.png
+_tools/*.jpg
+*.info.txt
+_release/
+
+# 依赖（用 npm install 装）
+node_modules/
+
+# 模型资源：DS 文件夹里那套是模型作者的作品，不入库。
+# 使用者自己把 Live2D 模型放进 ../DS，再跑 node _tools/build_assets.js 生成。
+assets/model/
+
+# Live2D Cubism Core：Live2D 公司的 SDK，再分发需接受其条款，不入库。
+# 使用者跑 node _tools/fetch_core.js 自己下载。
+vendor/live2dcubismcore.min.js
+
+# 系统垃圾
+Thumbs.db
+desktop.ini
+.DS_Store

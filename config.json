@@ -1,0 +1,252 @@
+{
+  "window": {
+    "width": 320,
+    "height": 440,
+    "scale": 1,
+    "x": null,
+    "y": null,
+    "alwaysOnTop": true,
+    "opacity": 1
+  },
+  "watch": {
+    "sessionsRoot": "",
+    "pollMs": 700,
+    "activeWindowMs": 600000,
+    "idleAfterMs": 25000
+  },
+  "bubble": {
+    "enabled": true,
+    "durationMs": 5000,
+    "fontSize": 13,
+    "maxHeightRatio": 0.58
+  },
+  "easterEgg": {
+    "enabled": true,
+    "motion": "aidale",
+    "minIntervalMs": 60000,
+    "maxIntervalMs": 180000,
+    "onlyWhenIdle": true
+  },
+  "vision": {
+    "enabled": true,
+    "preset": "deepseek",
+    "format": "",
+    "endpoint": "",
+    "model": "deepseek-flash",
+    "apiKey": "",
+    "thinking": "off",
+    "maxTokens": 400,
+    "maxWidth": 1280,
+    "intervalMs": 60000,
+    "changeThreshold": 0.02,
+    "silentRoundsMin": 4,
+    "silentRoundsMax": 8,
+    "lookPrompt": "看看我的屏幕，用一两句话随口说点什么。",
+    "useForegroundWindow": true
+  },
+  "chat": {
+    "enabled": true,
+    "customPrompt": "",
+    "maxTurns": 12,
+    "contextLimitTurns": 20,
+    "warnWhenLong": true,
+    "sendScreenWithChat": true,
+    "fontSize": 12
+  },
+  "memory": {
+    "enabled": true
+  },
+  "states": {
+    "idle": {
+      "label": "待机",
+      "expressions": [],
+      "motion": null,
+      "bubble": ""
+    },
+    "listening": {
+      "label": "收到消息",
+      "expressions": [
+        "感叹号"
+      ],
+      "motion": null,
+      "bubble": "收到啦～"
+    },
+    "thinking": {
+      "label": "思考中",
+      "expressions": [
+        "呆呆眼"
+      ],
+      "motion": null,
+      "bubble": "思考中…"
+    },
+    "tool": {
+      "label": "调用工具",
+      "expressions": [
+        "圆眼镜"
+      ],
+      "motion": null,
+      "bubble": "正在用 {tool}…"
+    },
+    "replying": {
+      "label": "回复中",
+      "expressions": [
+        "开心兴奋"
+      ],
+      "motion": null,
+      "bubble": "正在说话…"
+    },
+    "waiting": {
+      "label": "等待确认",
+      "expressions": [
+        "问号"
+      ],
+      "motion": null,
+      "bubble": "在等你确认哦"
+    },
+    "done": {
+      "label": "完成",
+      "expressions": [
+        "星星眼"
+      ],
+      "motion": "chuipaopao",
+      "bubble": "搞定！"
+    },
+    "error": {
+      "label": "出错",
+      "expressions": [
+        "晕晕"
+      ],
+      "motion": null,
+      "bubble": "出错了…"
+    }
+  },
+  "moods": {
+    "happy": {
+      "label": "开心",
+      "expressions": [
+        "开心兴奋",
+        "爱心眼"
+      ],
+      "bubble": "好耶！",
+      "keywords": [
+        "完成",
+        "搞定",
+        "成功",
+        "已修复",
+        "通过",
+        "好啦",
+        "没问题",
+        "已就绪",
+        "✅",
+        "就绪"
+      ]
+    },
+    "sad": {
+      "label": "难过",
+      "expressions": [
+        "哭",
+        "悲伤"
+      ],
+      "bubble": "唔…",
+      "keywords": [
+        "抱歉",
+        "失败",
+        "无法",
+        "做不到",
+        "很遗憾",
+        "没办法",
+        "报错"
+      ]
+    },
+    "confused": {
+      "label": "疑惑",
+      "expressions": [
+        "问号",
+        "呆呆眼"
+      ],
+      "bubble": "咦？",
+      "keywords": [
+        "不确定",
+        "可能",
+        "也许",
+        "需要确认",
+        "？",
+        "?",
+        "建议"
+      ]
+    },
+    "tense": {
+      "label": "紧张",
+      "expressions": [
+        "流汗",
+        "感叹号"
+      ],
+      "bubble": "小心点呀…",
+      "keywords": [
+        "警告",
+        "注意",
+        "风险",
+        "危险",
+        "慎重",
+        "不可逆",
+        "覆盖",
+        "删除",
+        "备份"
+      ]
+    },
+    "angry": {
+      "label": "生气",
+      "expressions": [
+        "生气",
+        "阴暗"
+      ],
+      "bubble": "哼！",
+      "keywords": [
+        "禁止",
+        "不允许",
+        "拒绝",
+        "不行",
+        "违规",
+        "不应该"
+      ]
+    },
+    "love": {
+      "label": "亲近",
+      "expressions": [
+        "脸红",
+        "调皮"
+      ],
+      "bubble": "嘿嘿～",
+      "keywords": [
+        "谢谢",
+        "感谢",
+        "辛苦",
+        "厉害",
+        "棒",
+        "喜欢",
+        "加油"
+      ]
+    }
+  },
+  "interact": {
+    "clickExpressions": [
+      "调皮",
+      "脸红",
+      "星星眼",
+      "爱心眼",
+      "喵喵手~喵~动画",
+      "双手比耶"
+    ],
+    "clickBubbles": [
+      "干嘛呀～",
+      "别戳啦",
+      "在的在的",
+      "嘿嘿",
+      "喵～"
+    ],
+    "clickMotions": [
+      "zipai_simple",
+      "kaigai"
+    ]
+  }
+}

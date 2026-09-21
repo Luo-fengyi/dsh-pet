@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>DS娘桌宠 · 设置</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #171b21; color: #dfe6ee;
+      font: 13px/1.6 "Microsoft YaHei", "Segoe UI", sans-serif;
+      display: flex; flex-direction: column; height: 100vh;
+    }
+    header { padding: 14px 18px 0; }
+    h1 { font-size: 16px; margin: 0 0 3px; color: #fff; }
+    .sub { color: #8a97a6; font-size: 12px; }
+    nav.tabs { display: flex; gap: 4px; padding: 12px 18px 0; border-bottom: 1px solid #262e38; }
+    nav.tabs button {
+      border: 0; background: transparent; color: #9aa8b6; cursor: pointer;
+      padding: 7px 14px; border-radius: 8px 8px 0 0; font-size: 13px;
+    }
+    nav.tabs button.active { background: #1c2129; color: #fff; box-shadow: inset 0 -2px 0 #3b7dd8; }
+    main { flex: 1; overflow-y: auto; padding: 14px 18px 90px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    section { border: 1px solid #2a323c; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; background: #1c2129; }
+    section > h2 { font-size: 13px; margin: 0 0 10px; color: #7fb2ff; font-weight: 600; }
+    .row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+    .row > label { flex: 0 0 132px; color: #a9b6c4; }
+    .row > .ctl { flex: 1; display: flex; gap: 8px; align-items: center; min-width: 0; }
+    input[type="text"], input[type="password"], input[type="number"], select, textarea {
+      width: 100%; min-width: 0; padding: 6px 9px; border-radius: 7px;
+      border: 1px solid #313a46; background: #12161b; color: #e8eef6;
+      font: 12px/1.5 Consolas, "Microsoft YaHei", monospace; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #4a86d8; }
+    textarea { resize: vertical; min-height: 76px; font-family: "Microsoft YaHei", sans-serif; }
+    .hint { color: #7c8896; font-size: 11.5px; margin: -4px 0 8px 142px; }
+    .check { display: flex; align-items: center; gap: 7px; color: #cfd9e4; }
+    footer {
+      position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 18px;
+      background: #12161b; border-top: 1px solid #262e38; display: flex; align-items: center; gap: 12px;
+    }
+    button {
+      padding: 7px 16px; border-radius: 8px; border: 1px solid #39424f;
+      background: #232b35; color: #dfe6ee; cursor: pointer; font-size: 13px;
+    }
+    button.primary { background: #3b7dd8; border-color: #3b7dd8; color: #fff; }
+    button:hover { filter: brightness(1.12); }
+    button:disabled { opacity: 0.55; cursor: default; }
+    #msg { font-size: 12.5px; flex: 1; }
+    #msg.ok { color: #57c98a; }
+    #msg.err { color: #ff8a8a; }
+    #msg.busy { color: #e8c46a; }
+
+    /* 历史记录 */
+    #historyList { display: flex; flex-direction: column; gap: 8px; }
+    .msg { max-width: 82%; padding: 7px 11px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; }
+    .msg.me { align-self: flex-end; background: #29435f; color: #eaf3ff; }
+    .msg.her { align-self: flex-start; background: #232b35; color: #dfe6ee; }
+    .msg .time { display: block; font-size: 10.5px; color: #8695a4; margin-top: 4px; }
+    .empty { color: #7c8896; text-align: center; padding: 26px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>DS娘桌宠 · 设置</h1>
+    <div class="sub">改完点「保存」立刻生效。API key 单独存在 <code>secrets.json</code>，不写进 config.json。</div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="api" class="active">接口</button>
+    <button data-tab="screen">看屏幕</button>
+    <button data-tab="chat">对话</button>
+    <button data-tab="look">外观</button>
+    <button data-tab="history">历史</button>
+  </nav>
+
+  <main>
+    <div class="panel active" id="panel-api">
+      <section>
+        <h2>接口（API）</h2>
+        <div class="row">
+          <label>预设</label>
+          <div class="ctl">
+            <select id="preset">
+              <option value="deepseek">DeepSeek 官方（默认，可复用 DSH 的 key）</option>
+              <option value="zhipu">智谱 GLM-4V</option>
+              <option value="dashscope">通义千问 qwen-vl</option>
+              <option value="openai">OpenAI</option>
+              <option value="custom">自定义（OpenAI 兼容）</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <label>接口格式</label>
+          <div class="ctl">
+            <select id="format">
+              <option value="">跟预设（推荐）</option>
+              <option value="anthropic">Anthropic（/v1/messages）</option>
+              <option value="openai">OpenAI 兼容（/v1/chat/completions）</option>
+            </select>
+          </div>
+        </div>
+        <div class="row"><label>接口地址</label><div class="ctl"><input id="endpoint" type="text" placeholder="留空 = 用预设地址" /></div></div>
+        <div class="row"><label>模型名</label><div class="ctl"><input id="model" type="text" placeholder="留空 = 用预设模型" /></div></div>
+        <div class="row"><label>API Key</label><div class="ctl"><input id="apiKey" type="password" placeholder="留空保存 = 保留原样；填了则覆盖" /></div></div>
+        <div class="hint" id="keyHint">尚未保存 key</div>
+        <div class="row">
+          <label>思考强度</label>
+          <div class="ctl">
+            <select id="thinking">
+              <option value="off">关闭（最快最省，推荐）</option>
+              <option value="low">最低档思考</option>
+              <option value="default">用接口默认</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="panel" id="panel-screen">
+      <section>
+        <h2>看桌面</h2>
+        <div class="row"><label>总开关</label><div class="ctl"><label class="check"><input id="vEnabled" type="checkbox" /> 允许看屏幕</label></div></div>
+        <div class="row"><label>采样间隔</label><div class="ctl"><input id="intervalSec" type="number" min="10" step="5" style="width:110px" /> <span class="hint" style="margin:0">秒（默认 60）</span></div></div>
+        <div class="row"><label>变化阈值</label><div class="ctl"><input id="threshold" type="number" min="0" max="1" step="0.005" style="width:110px" /> <span class="hint" style="margin:0">0~1，越大越不敏感</span></div></div>
+        <div class="row"><label>没变化时静默</label><div class="ctl">
+          <input id="silentMin" type="number" min="1" step="1" style="width:80px" /> ～
+          <input id="silentMax" type="number" min="1" step="1" style="width:80px" />
+          <span class="hint" style="margin:0">轮（每轮 = 一个采样间隔）</span>
+        </div></div>
+        <div class="row"><label>截图宽度</label><div class="ctl"><input id="maxWidth" type="number" min="480" max="1920" step="80" style="width:110px" /> <span class="hint" style="margin:0">像素，越小越省 token</span></div></div>
+        <div class="row"><label>关联前台窗口</label><div class="ctl"><label class="check"><input id="useForeground" type="checkbox" /> 告诉她你当前在用什么软件</label></div></div>
+        <div class="row"><label>看屏幕提示词</label><div class="ctl"><input id="lookPrompt" type="text" /></div></div>
+        <div class="hint">每次采样都会把屏幕截图发给你配置的接口。画面没明显变化时不会调用。</div>
+      </section>
+    </div>
+
+    <div class="panel" id="panel-chat">
+      <section>
+        <h2>对话</h2>
+        <div class="row"><label>总开关</label><div class="ctl"><label class="check"><input id="cEnabled" type="checkbox" /> 允许在回复框里聊天</label></div></div>
+        <div class="row"><label>自定义提示词</label><div class="ctl"><textarea id="customPrompt" placeholder="追加要求，比如：说话用上海话、叫我老板、别聊工作以外的事…"></textarea></div></div>
+        <div class="hint">内置人设（DS娘是谁、该怎么说话）固定不可改，其中已要求【极简：1~2 句、40 字以内】。想让她多说，就在下面写一句「可以多说几句，不用压字数」。</div>
+        <div class="row"><label>上下文轮数</label><div class="ctl"><input id="maxTurns" type="number" min="1" max="80" step="1" style="width:110px" /> <span class="hint" style="margin:0">带几轮历史（默认 12）</span></div></div>
+        <div class="row"><label>过长提醒</label><div class="ctl">
+          <input id="limitTurns" type="number" min="2" max="200" step="1" style="width:110px" />
+          <label class="check"><input id="warnLong" type="checkbox" /> 超过就提醒我新开会话</label>
+        </div></div>
+        <div class="row"><label>聊天时带截图</label><div class="ctl"><label class="check"><input id="withScreen" type="checkbox" /> 回你话时也能看到屏幕</label></div></div>
+      </section>
+      <section>
+        <h2>记忆</h2>
+        <div class="row"><label>长期记忆</label><div class="ctl"><label class="check"><input id="mEnabled" type="checkbox" /> 允许她记要紧的事（memory.txt，纯文本一整条）</label></div></div>
+        <div class="row"><label>当前记忆</label><div class="ctl"><span id="memoryView" class="hint" style="margin:0;word-break:break-all">（空）</span></div></div>
+        <div class="row"><label></label><div class="ctl"><button id="clearMemory">清空记忆</button></div></div>
+      </section>
+    </div>
+
+    <div class="panel" id="panel-look">
+      <section>
+        <h2>外观</h2>
+        <div class="row"><label>气泡字号</label><div class="ctl"><input id="bubbleFontSize" type="number" min="9" max="30" step="1" style="width:110px" /> <span class="hint" style="margin:0">px（默认 13）</span></div></div>
+        <div class="row"><label>气泡最大高度</label><div class="ctl"><input id="bubbleMaxRatio" type="number" min="0.2" max="0.85" step="0.02" style="width:110px" /> <span class="hint" style="margin:0">占窗口高度比例（默认 0.58）</span></div></div>
+        <div class="row"><label>回复框字号</label><div class="ctl"><input id="chatFontSize" type="number" min="9" max="24" step="1" style="width:110px" /> <span class="hint" style="margin:0">px（默认 12）</span></div></div>
+        <div class="hint">气泡停留时间会随内容自动变长（约每 10 个字 1 秒，最短 6 秒、最长 40 秒）。</div>
+      </section>
+    </div>
+
+    <div class="panel" id="panel-history">
+      <section>
+        <h2>聊天历史</h2>
+        <div class="row"><label></label><div class="ctl">
+          <button id="refreshHistory">刷新</button>
+          <button id="clearHistory">只清历史（新开会话）</button>
+        </div></div>
+        <div id="historyList"><div class="empty">还没有聊过</div></div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <button id="save" class="primary">保存</button>
+    <button id="test">测试连接</button>
+    <span id="msg"></span>
+  </footer>
+
+  <script src="settings.js"></script>
+</body>
+</html>
