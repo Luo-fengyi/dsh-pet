@@ -96,7 +96,11 @@ node _tools/fetch_core.js
 
 ### 4. 启动
 
-双击 **`启动桌宠.vbs`**（无控制台窗口），或 `启动桌宠.cmd`。
+双击 **`启动桌宠.exe`** 就行——带桌宠图标、无控制台窗口，也不用担心 `.vbs` 被安全软件拦。
+
+（`启动桌宠.vbs` / `启动桌宠.cmd` 也都能用，效果一样；exe 只是想改图标或重新编译时跑
+`powershell -File _tools/build_launcher.ps1`。）
+
 关闭：右键桌宠 →「退出桌宠」，或双击 **`关闭桌宠.vbs`**。
 
 ---
@@ -156,6 +160,7 @@ dsh-pet/
   assets/model/            模型资源（自己生成，不入库）
   vendor/                  Cubism Core + PIXI + pixi-live2d-display
   _tools/                  构建与自测脚本
+  启动桌宠.exe              双击启动（C# 启动器，源码 _tools/launcher.cs，重编译见 build_launcher.ps1）
   启动桌宠.vbs / 关闭桌宠.vbs
   pet.log                  运行日志（排查用）
 ```
