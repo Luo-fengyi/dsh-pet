@@ -35,8 +35,6 @@ Windows / Electron / 纯本地运行，不依赖任何云服务（除了你自�
 
 **记忆**：她觉得值得记的事会写进 `memory.txt`（纯文本一整条），跨会话保留。
 
-**彩蛋**：空闲时会随机演一次模型作者做的"敲一下出包"动画（可在配置里关掉）。
-
 **其他**：拖动改位置、点击有反应、右键菜单（大小 / 置顶 / 设置 / 新开会话 / 看一眼桌面）、窗口位置与大小自动记住。
 
 ---
@@ -144,7 +142,7 @@ dsh-pet/
   preload.js               安全桥
   config.json              全部可调项（只读配置）
   settings.html / .js      设置窗
-  renderer/                页面：Live2D 渲染、气泡、回复框、点击交互、彩蛋
+  renderer/                页面：Live2D 渲染、气泡、回复框、点击交互
   src/
     status-watcher.js      DSH 会话日志 → 状态机
     zstd-frame.js          zstd 分帧解码（DSH 日志是逐帧追加的）
