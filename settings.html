@@ -180,9 +180,15 @@
       <section>
         <h2>桌宠窗口</h2>
         <div class="row"><label>桌宠大小</label><div class="ctl">
+          <input id="scaleRange" type="range" min="0.5" max="2.5" step="0.05" style="flex:1;min-width:120px" />
+          <span id="scaleVal" style="width:52px;text-align:right">100%</span>
+          <button id="scaleReset">复位</button>
+        </div></div>
+        <div class="row"><label>快捷</label><div class="ctl">
           <button data-size="0.75">小</button>
           <button data-size="1">中</button>
-          <button data-size="1.35">大</button>
+          <button data-size="1.5">大</button>
+          <span class="hint" style="margin:0">拖动滑块实时预览</span>
         </div></div>
         <div class="row"><label>窗口置顶</label><div class="ctl"><label class="check"><input id="winTop" type="checkbox" /> 始终显示在最前面</label></div></div>
         <div class="row"><label>状态气泡</label><div class="ctl"><label class="check"><input id="winBubble" type="checkbox" /> 说话时显示气泡</label></div></div>

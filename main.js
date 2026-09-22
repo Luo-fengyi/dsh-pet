@@ -34,8 +34,8 @@ function applyStateToConfig() {
   const st = loadState()
   if (typeof st.x === 'number') cfg.window.x = st.x
   if (typeof st.y === 'number') cfg.window.y = st.y
-  if (typeof st.width === 'number') cfg.window.width = st.width
-  if (typeof st.height === 'number') cfg.window.height = st.height
+  // 尺寸不再从 window-state 恢复：改由 config 的 window.scale 决定，
+  // 否则"上次的尺寸"再乘一遍缩放会双重累积
   if (typeof st.alwaysOnTop === 'boolean') cfg.window.alwaysOnTop = st.alwaysOnTop
   if (cfg.bubble && typeof st.bubbleEnabled === 'boolean') cfg.bubble.enabled = st.bubbleEnabled
 }
@@ -53,6 +53,7 @@ function saveState() {
       height: b.height,
       alwaysOnTop: !!cfg.window.alwaysOnTop,
       bubbleEnabled: !!(cfg.bubble && cfg.bubble.enabled),
+      scale: Number(cfg.window.scale) || 1,
     }, null, 2), 'utf8')
   } catch (_) {}
 }
@@ -479,17 +480,19 @@ function applyOutfit(sel, how) {
 
 function applySize(scale) {
   if (!win) return
+  const s = Math.min(3, Math.max(0.4, Number(scale) || 1))
   const b = win.getBounds()
-  const w = Math.round(baseSize.w * scale)
-  const h = Math.round(baseSize.h * scale)
+  const w = Math.round(baseSize.w * s)
+  const h = Math.round(baseSize.h * s)
   design = { w, h }
+  cfg.window.scale = s
   cfg.window.width = w
   cfg.window.height = h
   // 以底边中心为锚点缩放
   const cx = b.x + Math.round(b.width / 2)
   const by = b.y + b.height
   win.setBounds({ x: cx - Math.round(w / 2), y: by - h, width: w, height: h })
-  win.webContents.send('pet:resize', { scale })
+  win.webContents.send('pet:resize', { scale: s })
   saveState()
 }
 
@@ -532,6 +535,13 @@ app.whenReady().then(() => {
     cfg.watch = Object.assign({}, cfg.watch, { sessionsRoot: path.join(home, 'sessions') })
   }
   baseSize = { w: cfg.window.width, h: cfg.window.height }
+  // 按 config 里存的缩放倍率算实际窗口尺寸
+  {
+    const s = Math.min(3, Math.max(0.4, Number(cfg.window.scale) || 1))
+    cfg.window.scale = s
+    cfg.window.width = Math.round(baseSize.w * s)
+    cfg.window.height = Math.round(baseSize.h * s)
+  }
 
   // 装扮：开着「启动随机」就每次开机随机一套，关掉则沿用上次存下来的
   if (cfg.outfit && cfg.outfit.startupRandom !== false) {
@@ -604,6 +614,10 @@ app.whenReady().then(() => {
     if (win && !win.isDestroyed()) win.webContents.send('pet:config', cfg)
   })
   ipcMain.on('pet:reload-model', () => { if (win && !win.isDestroyed()) win.webContents.reload() })
+  // 鼠标穿透：渲染端判断光标是否落在角色本体上，不在就放行给下面的窗口
+  ipcMain.on('pet:mouse-through', (_e, through) => {
+    if (win && !win.isDestroyed()) win.setIgnoreMouseEvents(!!through, { forward: true })
+  })
   ipcMain.on('pet:open-path', (_e, which) => {
     const map = { config: CONFIG_PATH, memory: path.join(ROOT, 'memory.txt'), folder: ROOT }
     shell.openPath(map[which] || ROOT)

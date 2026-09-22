@@ -604,8 +604,37 @@ function finishPress(tap) {
   if (tap && !moved) onTap()
 }
 
+// ---- 透明区域鼠标穿透 ----
+// 只有「角色本体所在矩形」和「回复框」接收鼠标，其余透明部分放行给下面的窗口，
+// 免得窗口里大片空白也吃掉点击
+let lastInside = null
+
+function pointInModel(x, y) {
+  if (!model) return false
+  try {
+    const b = model.getBounds()
+    return x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height
+  } catch (_) {
+    return false
+  }
+}
+
+function updateMouseThrough(ev) {
+  if (pressing) return   // 拖动过程中别切换，否则 mouseup 会丢
+  let inside = pointInModel(ev.clientX, ev.clientY)
+  if (!inside && el.chatBox) {
+    const r = el.chatBox.getBoundingClientRect()
+    if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) inside = true
+  }
+  if (inside !== lastInside) {
+    lastInside = inside
+    window.pet.mouseThrough(!inside)
+  }
+}
+
 window.addEventListener('mousedown', beginPress)
 window.addEventListener('mousemove', movePress)
+window.addEventListener('mousemove', updateMouseThrough)
 window.addEventListener('mouseup', () => finishPress(true))
 // 不用 blur 结束拖动：窗口移动时会误触发失焦，拖动会「一碰就断」
 window.addEventListener('contextmenu', (ev) => {

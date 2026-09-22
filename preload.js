@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('pet', {
 
   // 从右键菜单搬到设置窗的几项
   setSize: (scale) => ipcRenderer.send('pet:set-size', scale),
+  mouseThrough: (through) => ipcRenderer.send('pet:mouse-through', through),
   setTop: (on) => ipcRenderer.send('pet:set-top', on),
   setBubble: (on) => ipcRenderer.send('pet:set-bubble', on),
   reloadModel: () => ipcRenderer.send('pet:reload-model'),

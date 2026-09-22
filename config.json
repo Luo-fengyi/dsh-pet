@@ -2,7 +2,7 @@
   "window": {
     "width": 320,
     "height": 440,
-    "scale": 1,
+    "scale": 1.5,
     "x": null,
     "y": null,
     "alwaysOnTop": true,
@@ -38,7 +38,7 @@
     "endpoint": "",
     "model": "deepseek-flash",
     "apiKey": "",
-    "thinking": "off",
+    "thinking": "low",
     "maxTokens": 400,
     "maxWidth": 1280,
     "intervalMs": 60000,
@@ -129,10 +129,10 @@
       }
     },
     "selected": {
-      "head": "头箍",
+      "head": "蝴蝶结贴纸",
       "glasses": null,
-      "desk": null,
-      "hand": "双手比耶",
+      "desk": "鲸鱼放桌上",
+      "hand": null,
       "bg": null,
       "misc": null
     },

@@ -64,6 +64,7 @@ function fill(s) {
   const ws = (s && s.windowState) || {}
   $('winTop').checked = ws.alwaysOnTop !== false
   $('winBubble').checked = ws.bubbleEnabled !== false
+  if (typeof syncScale === "function") syncScale(ws.scale || 1)
 }
 
 // ---- 装扮 ----
@@ -277,8 +278,23 @@ $('outfitClear').addEventListener('click', async () => {
 })
 
 // ---- 从右键菜单搬到这里的几项：点一下立刻生效，不用保存 ----
+function syncScale(v) {
+  const s = Math.min(2.5, Math.max(0.5, Number(v) || 1))
+  $('scaleRange').value = String(s)
+  $('scaleVal').textContent = Math.round(s * 100) + '%'
+}
+$('scaleRange').addEventListener('input', () => {
+  const v = Number($('scaleRange').value)
+  $('scaleVal').textContent = Math.round(v * 100) + '%'
+  window.pet.setSize(v)
+})
+$('scaleReset').addEventListener('click', () => { syncScale(1); window.pet.setSize(1) })
 for (const btn of document.querySelectorAll('[data-size]')) {
-  btn.addEventListener('click', () => window.pet.setSize(Number(btn.dataset.size)))
+  btn.addEventListener('click', () => {
+    const v = Number(btn.dataset.size)
+    syncScale(v)
+    window.pet.setSize(v)
+  })
 }
 $('winTop').addEventListener('change', () => window.pet.setTop($('winTop').checked))
 $('winBubble').addEventListener('change', () => window.pet.setBubble($('winBubble').checked))
