@@ -7,7 +7,10 @@ function randomOutfit(cfg, chance) {
   const p = typeof chance === 'number' ? chance : 0.7
   const sel = {}
   for (const key of Object.keys(cats)) {
-    const items = (cats[key] && cats[key].items) || []
+    // 候选项可以是字符串，也可以是 { label, name } 对象（name 只是显示用的别名）
+    const items = ((cats[key] && cats[key].items) || [])
+      .map((it) => (typeof it === 'string' ? it : (it && it.label) || ''))
+      .filter(Boolean)
     sel[key] = items.length && Math.random() < p ? items[Math.floor(Math.random() * items.length)] : null
   }
   return sel

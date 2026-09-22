@@ -417,6 +417,8 @@ function createWindow() {
   const keepTop = () => {
     if (!win || win.isDestroyed()) return
     if (cfg.window.alwaysOnTop === false) return
+    // 设置窗开着的时候别抢层级：它俩一抢，设置窗里的原生下拉框刚点开就被收回去
+    if (settingsWin && !settingsWin.isDestroyed() && settingsWin.isVisible()) return
     try { win.setAlwaysOnTop(true, 'screen-saver') } catch (_) {}
   }
   // 刷新间隔可配（window.topRefreshMs，默认 2 秒）；设为 0 则只在失焦时刷新

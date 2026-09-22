@@ -96,9 +96,13 @@ function renderOutfit(s) {
     none.textContent = '（不装）'
     select.appendChild(none)
     for (const item of cat.items || []) {
+      // 候选项可以写成字符串，也可以写成 { label, name } —— 后者用来给选项换个更好懂的名字
+      const label = typeof item === 'string' ? item : (item && item.label) || ''
+      const showName = typeof item === 'string' ? item : ((item && item.name) || label)
+      if (!label) continue
       const op = document.createElement('option')
-      op.value = item
-      op.textContent = item
+      op.value = label
+      op.textContent = showName
       select.appendChild(op)
     }
     select.value = sel[key] || ''

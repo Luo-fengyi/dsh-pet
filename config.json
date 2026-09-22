@@ -66,7 +66,7 @@
       "head": {
         "label": "头饰",
         "items": [
-          "头箍",
+          { "label": "头箍", "name": "摘掉发箍（默认是戴着的）" },
           "单边马尾",
           "猫猫贴纸",
           "兔兔贴纸",
@@ -121,11 +121,11 @@
     },
     "selected": {
       "head": null,
-      "glasses": null,
+      "glasses": "椭圆眼镜",
       "desk": null,
-      "hand": null,
-      "bg": null,
-      "misc": null
+      "hand": "魔爪",
+      "bg": "深色桌布",
+      "misc": "撤回"
     },
     "lastRandom": null
   },
