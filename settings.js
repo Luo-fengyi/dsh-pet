@@ -60,6 +60,10 @@ function fill(s) {
   $('bubbleMaxSec').value = Math.round((a.bubbleMaxMs || 40000) / 1000)
   $('topRefreshMs').value = a.topRefreshMs === undefined ? 2000 : a.topRefreshMs
   renderOutfit(s)
+  // 窗口状态是即时生效的，直接回显主进程报上来的真实值
+  const ws = (s && s.windowState) || {}
+  $('winTop').checked = ws.alwaysOnTop !== false
+  $('winBubble').checked = ws.bubbleEnabled !== false
 }
 
 // ---- 装扮 ----
@@ -267,6 +271,17 @@ $('outfitClear').addEventListener('click', async () => {
     say('操作失败：' + (e && e.message ? e.message : e), 'err')
   }
 })
+
+// ---- 从右键菜单搬到这里的几项：点一下立刻生效，不用保存 ----
+for (const btn of document.querySelectorAll('[data-size]')) {
+  btn.addEventListener('click', () => window.pet.setSize(Number(btn.dataset.size)))
+}
+$('winTop').addEventListener('change', () => window.pet.setTop($('winTop').checked))
+$('winBubble').addEventListener('change', () => window.pet.setBubble($('winBubble').checked))
+$('reloadModel').addEventListener('click', () => window.pet.reloadModel())
+for (const btn of document.querySelectorAll('[data-open]')) {
+  btn.addEventListener('click', () => window.pet.openPath(btn.dataset.open))
+}
 
 $('clearHistory').addEventListener('click', async () => {
   await window.pet.newSession()

@@ -178,9 +178,29 @@
         <div class="hint">实际停留 = 字数 × 每个字毫秒，再夹在最短和最长之间。嫌读不完就把“每个字”调大。</div>
       </section>
       <section>
-        <h2>窗口</h2>
-        <div class="row"><label>置顶刷新间隔</label><div class="ctl"><input id="topRefreshMs" type="number" min="0" max="60000" step="500" style="width:110px" /> <span class="hint" style="margin:0">毫秒，0 = 不自动刷新（只在失焦时恢复）</span></div></div>
+        <h2>桌宠窗口</h2>
+        <div class="row"><label>桌宠大小</label><div class="ctl">
+          <button data-size="0.75">小</button>
+          <button data-size="1">中</button>
+          <button data-size="1.35">大</button>
+        </div></div>
+        <div class="row"><label>窗口置顶</label><div class="ctl"><label class="check"><input id="winTop" type="checkbox" /> 始终显示在最前面</label></div></div>
+        <div class="row"><label>状态气泡</label><div class="ctl"><label class="check"><input id="winBubble" type="checkbox" /> 说话时显示气泡</label></div></div>
+        <div class="row"><label></label><div class="ctl"><button id="reloadModel">重新加载模型</button></div></div>
+        <div class="hint">这几项点一下立刻生效，不用点保存。</div>
+      </section>
+      <section>
+        <h2>置顶刷新</h2>
+        <div class="row"><label>刷新间隔</label><div class="ctl"><input id="topRefreshMs" type="number" min="0" max="60000" step="500" style="width:110px" /> <span class="hint" style="margin:0">毫秒，0 = 不自动刷新（只在失焦时恢复）</span></div></div>
         <div class="hint">Windows 上被全屏窗口盖过一次之后 topmost 会失效，所以需要隔一段时间重新置顶一次。</div>
+      </section>
+      <section>
+        <h2>文件</h2>
+        <div class="row"><label></label><div class="ctl">
+          <button data-open="config">打开配置文件</button>
+          <button data-open="memory">打开记忆文件</button>
+          <button data-open="folder">打开文件夹</button>
+        </div></div>
       </section>
     </div>
 

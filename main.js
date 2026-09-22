@@ -451,45 +451,9 @@ function startWatcher() {
 
 function buildMenu() {
   const template = [
-    {
-      label: '桌宠大小',
-      submenu: [
-        { label: '小', click: () => applySize(0.75) },
-        { label: '中', click: () => applySize(1) },
-        { label: '大', click: () => applySize(1.35) },
-      ],
-    },
-    {
-      label: '窗口置顶',
-      type: 'checkbox',
-      checked: !!(win && win.isAlwaysOnTop()),
-      click: (item) => {
-        if (win) win.setAlwaysOnTop(item.checked, 'floating')
-        cfg.window.alwaysOnTop = item.checked
-        saveState()
-      },
-    },
-    {
-      label: '状态气泡',
-      type: 'checkbox',
-      checked: !!(cfg.bubble && cfg.bubble.enabled),
-      click: (item) => {
-        cfg.bubble.enabled = item.checked
-        saveState()
-        if (win) win.webContents.send('pet:config', cfg)
-      },
-    },
-    { type: 'separator' },
     { label: '看一眼桌面', click: () => { if (assistant) assistant.lookNow('manual') } },
-    { label: '新开会话', click: () => { if (assistant) assistant.newSession() } },
     { label: '随机换装扮', click: () => applyOutfit(outfitMod.randomOutfit(cfg), '随机装扮') },
-    { label: '恢复默认装扮', click: () => applyOutfit(outfitMod.emptyOutfit(cfg), '恢复默认') },
     { label: '设置…', click: () => openSettings() },
-    { type: 'separator' },
-    { label: '重新加载模型', click: () => { if (win) win.webContents.reload() } },
-    { label: '打开配置文件', click: () => shell.openPath(CONFIG_PATH) },
-    { label: '打开记忆文件', click: () => shell.openPath(path.join(ROOT, 'memory.txt')) },
-    { label: '打开 DSPet 文件夹', click: () => shell.openPath(ROOT) },
     { type: 'separator' },
     { label: '退出桌宠', click: () => { saveState(); app.quit() } },
   ]
@@ -616,9 +580,36 @@ app.whenReady().then(() => {
   ipcMain.handle('pet:outfit-reset', () => applyOutfit(outfitMod.emptyOutfit(cfg), '恢复默认'))
   ipcMain.handle('pet:outfit-set', (_e, sel) => applyOutfit(sel || {}, '手动指定'))
 
+  // ---- 从右键菜单搬到设置窗的几项 ----
+  ipcMain.on('pet:set-size', (_e, scale) => applySize(Number(scale) || 1))
+  ipcMain.on('pet:set-top', (_e, on) => {
+    cfg.window.alwaysOnTop = !!on
+    if (win && !win.isDestroyed()) win.setAlwaysOnTop(!!on, 'screen-saver')
+    saveState()
+    if (win && !win.isDestroyed()) win.webContents.send('pet:config', cfg)
+  })
+  ipcMain.on('pet:set-bubble', (_e, on) => {
+    cfg.bubble = Object.assign({}, cfg.bubble, { enabled: !!on })
+    store.mergeConfig(ROOT, { bubble: { enabled: !!on } })
+    if (win && !win.isDestroyed()) win.webContents.send('pet:config', cfg)
+  })
+  ipcMain.on('pet:reload-model', () => { if (win && !win.isDestroyed()) win.webContents.reload() })
+  ipcMain.on('pet:open-path', (_e, which) => {
+    const map = { config: CONFIG_PATH, memory: path.join(ROOT, 'memory.txt'), folder: ROOT }
+    shell.openPath(map[which] || ROOT)
+  })
+
   // ---- 设置窗 ----
   ipcMain.on('pet:settings-open', () => openSettings())
-  ipcMain.handle('pet:settings-get', () => store.publicSettings(ROOT))
+  ipcMain.handle('pet:settings-get', () => {
+    const s = store.publicSettings(ROOT)
+    // 附上此刻真实的窗口状态（置顶/气泡是即时生效的，不靠保存）
+    s.windowState = {
+      alwaysOnTop: win && !win.isDestroyed() ? win.isAlwaysOnTop() : !!cfg.window.alwaysOnTop,
+      bubbleEnabled: !!(cfg.bubble && cfg.bubble.enabled),
+    }
+    return s
+  })
   ipcMain.handle('pet:settings-save', (_e, patch) => {
     const out = store.saveSettings(ROOT, patch || {})
     cfg = out.config
