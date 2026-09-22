@@ -417,8 +417,6 @@ function createWindow() {
   const keepTop = () => {
     if (!win || win.isDestroyed()) return
     if (cfg.window.alwaysOnTop === false) return
-    // 设置窗开着的时候别抢层级：它俩一抢，设置窗里的原生下拉框刚点开就被收回去
-    if (settingsWin && !settingsWin.isDestroyed() && settingsWin.isVisible()) return
     try { win.setAlwaysOnTop(true, 'screen-saver') } catch (_) {}
   }
   // 刷新间隔可配（window.topRefreshMs，默认 2 秒）；设为 0 则只在失焦时刷新
@@ -503,8 +501,8 @@ function openSettings() {
     autoHideMenuBar: true,
     center: true,
     show: false,
-    // 挂在桌宠窗口下当子窗口：桌宠是置顶的，设置窗跟着就不会被别的窗口压住
-    parent: win && !win.isDestroyed() ? win : undefined,
+    // 不做桌宠的子窗口：子窗口会被父窗口的置顶刷新反复重排，原生下拉框一开就被收掉；
+    // 独立窗口则互不影响，桌宠该置顶还照样置顶。
     webPreferences: {
       preload: path.join(ROOT, 'preload.js'),
       contextIsolation: true,

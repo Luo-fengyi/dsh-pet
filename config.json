@@ -61,12 +61,15 @@
     "enabled": true
   },
   "outfit": {
-    "startupRandom": true,
+    "startupRandom": false,
     "categories": {
       "head": {
         "label": "头饰",
         "items": [
-          { "label": "头箍", "name": "摘掉发箍（默认是戴着的）" },
+          {
+            "label": "头箍",
+            "name": "摘掉发箍（默认是戴着的）"
+          },
           "单边马尾",
           "猫猫贴纸",
           "兔兔贴纸",
@@ -85,9 +88,8 @@
       "desk": {
         "label": "桌面道具",
         "items": [
-          "巴菲",
+          { "label": "巴菲", "name": "收起桌面芭菲（默认是摆着的）" },
           "蛋包饭",
-          "点菜按下",
           "鲸鱼放桌上"
         ]
       },
@@ -121,11 +123,11 @@
     },
     "selected": {
       "head": null,
-      "glasses": "椭圆眼镜",
-      "desk": null,
-      "hand": "魔爪",
-      "bg": "深色桌布",
-      "misc": "撤回"
+      "glasses": null,
+      "desk": "鲸鱼放桌上",
+      "hand": null,
+      "bg": null,
+      "misc": null
     },
     "lastRandom": null
   },
