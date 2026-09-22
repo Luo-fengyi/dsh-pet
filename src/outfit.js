@@ -28,4 +28,30 @@ function describe(sel) {
   return picked.length ? picked.join('、') : '（无）'
 }
 
-module.exports = { randomOutfit, emptyOutfit, describe }
+// 当前所有分类里还在的候选项
+function validLabels(cfg) {
+  const cats = (cfg.outfit && cfg.outfit.categories) || {}
+  const set = new Set()
+  for (const key of Object.keys(cats)) {
+    for (const it of cats[key].items || []) {
+      const label = typeof it === 'string' ? it : (it && it.label) || ''
+      if (label) set.add(label)
+    }
+  }
+  return set
+}
+
+// 把 selected 里指向"已从列表删掉的项"的值清成 null。
+// 不清的话设置窗打开时那个下拉是空白的（值对不上任何 option），而且每次保存又会写回去。
+function sanitizeSelection(cfg, sel) {
+  const valid = validLabels(cfg)
+  const cats = (cfg.outfit && cfg.outfit.categories) || {}
+  const out = {}
+  for (const key of Object.keys(cats)) {
+    const v = sel && sel[key]
+    out[key] = v && valid.has(v) ? v : null
+  }
+  return out
+}
+
+module.exports = { randomOutfit, emptyOutfit, describe, validLabels, sanitizeSelection }

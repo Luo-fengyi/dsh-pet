@@ -468,11 +468,13 @@ function buildMenu() {
 
 // 换装扮：写盘 + 通知渲染端
 function applyOutfit(sel, how) {
-  store.mergeConfig(ROOT, { outfit: { selected: sel } })
-  cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
-  if (win && !win.isDestroyed()) win.webContents.send('pet:outfit', sel)
-  appendLog('[outfit] ' + how + '：' + outfitMod.describe(sel))
-  return sel
+  // 清掉指向"已从列表删掉的项"的残留值
+  const clean = outfitMod.sanitizeSelection(cfg, sel)
+  store.mergeConfig(ROOT, { outfit: { selected: clean } })
+  cfg.outfit = Object.assign({}, cfg.outfit, { selected: clean })
+  if (win && !win.isDestroyed()) win.webContents.send('pet:outfit', clean)
+  appendLog('[outfit] ' + how + '：' + outfitMod.describe(clean))
+  return clean
 }
 
 function applySize(scale) {
@@ -537,6 +539,14 @@ app.whenReady().then(() => {
     store.mergeConfig(ROOT, { outfit: { selected: sel } })
     cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
     appendLog('[outfit] 启动随机装扮：' + outfitMod.describe(sel))
+  } else if (cfg.outfit) {
+    // 没随机也要清一次残留（列表里删掉的项可能还留在 selected 里）
+    const clean = outfitMod.sanitizeSelection(cfg, cfg.outfit.selected)
+    if (outfitMod.describe(clean) !== outfitMod.describe(cfg.outfit.selected)) {
+      store.mergeConfig(ROOT, { outfit: { selected: clean } })
+      cfg.outfit = Object.assign({}, cfg.outfit, { selected: clean })
+      appendLog('[outfit] 清掉失效的装扮选择：' + outfitMod.describe(clean))
+    }
   }
   applyStateToConfig()
   trimLog()
@@ -611,6 +621,10 @@ app.whenReady().then(() => {
     return s
   })
   ipcMain.handle('pet:settings-save', (_e, patch) => {
+    // 设置窗可能还抱着已经不存在的装扮项（老表单），写盘前清一遍
+    if (patch && patch.outfit && patch.outfit.selected) {
+      patch.outfit.selected = outfitMod.sanitizeSelection(cfg, patch.outfit.selected)
+    }
     const out = store.saveSettings(ROOT, patch || {})
     cfg = out.config
     if (assistant) {
