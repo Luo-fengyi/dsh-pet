@@ -23,6 +23,7 @@ let keyToLabel = new Map()
 let motionNames = [] // Action 组里的动作顺序（ASCII 名）
 let lastW = 0
 let lastH = 0
+let currentScale = 0   // 0 表示"还不知道"，这时回落到 config 里的 window.scale
 let currentState = null
 let bubbleTimer = null
 let idleTimer = null
@@ -35,6 +36,24 @@ function showHint(msg) {
   el.hint.classList.remove('hidden')
 }
 
+// 一屏能放多少字。
+// 注意：别用"塞进 DOM 再量 scrollHeight"那招——这套气泡是绝对定位 + transform 居中，
+// clientHeight 量出来不准，二分出来的结果会小到离谱（实测分成了 17 页、每页 8 个字）。
+// 这里按实测反推的经验系数估：中文连标点大约占 1.6 个字号的宽度/行高。
+function fitChars(text) {
+  const b = (cfg && cfg.bubble) || {}
+  const s = Math.max(0.5, Math.min(2.5, currentScale || (cfg.window && cfg.window.scale) || 1))
+  const eff = Math.max(0.7, Math.min(1.15, Math.pow(s, 0.7)))
+  const fs = Math.max(9, (Number(b.fontSize) || 13) * eff)
+  const ratio = Math.min(0.88, Math.max(0.2, (Number(b.maxHeightRatio) || 0.58) * (s < 0.85 ? 1.35 : 1)))
+  const bubbleW = window.innerWidth * 0.92 - 26
+  const bubbleH = window.innerHeight * ratio - 18
+  const perLine = Math.max(6, Math.floor(bubbleW / (fs * 1.6)))
+  const lines = Math.max(2, Math.floor(bubbleH / (fs * 1.6)))
+  const cap = Math.floor(perLine * lines * 0.9)   // 再留一成余量，宁可分页也别截字
+  return Math.max(20, Math.min(text.length, cap))
+}
+
 function showBubble(text, ms) {
   if (!text) return
   if (cfg && cfg.bubble && cfg.bubble.enabled === false) return
@@ -44,20 +63,40 @@ function showBubble(text, ms) {
   if (say === lastBubble && now - lastBubbleAt < 1500) return
   lastBubble = say
   lastBubbleAt = now
-  el.bubbleText.textContent = say
-  el.bubble.classList.remove('hidden')
-  el.bubble.classList.add('show')
-  if (bubbleTimer) clearTimeout(bubbleTimer)
-  // 停留时间 = 字数 × 每字毫秒，再夹在最短/最长之间（都可在设置里改）
+
   const b = (cfg && cfg.bubble) || {}
   const perChar = Number(b.msPerChar) > 0 ? Number(b.msPerChar) : 200
   const minMs = Number(b.minMs) > 0 ? Number(b.minMs) : 6000
   const maxMs = Number(b.maxMs) > 0 ? Number(b.maxMs) : 40000
-  const life = ms || Math.min(maxMs, Math.max(minMs, Math.round(say.length * perChar)))
-  bubbleTimer = setTimeout(() => {
-    el.bubble.classList.remove('show')
-    setTimeout(() => el.bubble.classList.add('hidden'), 240)
-  }, life)
+
+  // 一屏放不下就切几屏轮着播，保证能读完（页码会标出来）
+  const cap = fitChars(say)
+  const pages = []
+  if (say.length > cap * 1.1) {
+    for (let i = 0; i < say.length; i += cap) pages.push(say.slice(i, i + cap))
+  } else {
+    pages.push(say)
+  }
+
+  el.bubble.classList.remove('hidden')
+  el.bubble.classList.add('show')
+  if (bubbleTimer) clearTimeout(bubbleTimer)
+
+  let idx = 0
+  const showPage = () => {
+    const page = pages[idx]
+    el.bubbleText.textContent = pages.length > 1
+      ? page + '\n（' + (idx + 1) + '/' + pages.length + '）'
+      : page
+    const life = ms || Math.min(maxMs, Math.max(minMs, Math.round(page.length * perChar)))
+    idx += 1
+    bubbleTimer = setTimeout(() => {
+      if (idx < pages.length) { showPage(); return }
+      el.bubble.classList.remove('show')
+      setTimeout(() => el.bubble.classList.add('hidden'), 240)
+    }, life)
+  }
+  showPage()
 }
 
 function expressionKey(label) {
@@ -227,12 +266,17 @@ function applyAppearance() {
   if (!cfg) return
   const b = cfg.bubble || {}
   const c = cfg.chat || {}
-  const bubbleFs = Number(b.fontSize) || 13
+  // 窗口缩小时字也跟着缩（非线性、带下限），否则一行放不下几个字、长回复读不完
+  const s = Math.max(0.5, Math.min(2.5, currentScale || (cfg.window && cfg.window.scale) || 1))
+  const eff = Math.max(0.7, Math.min(1.15, Math.pow(s, 0.7)))
+  const bubbleFs = Math.max(9, Math.round((Number(b.fontSize) || 13) * eff))
   el.bubble.style.fontSize = bubbleFs + 'px'
-  const chatFs = Number(c.fontSize) || 12
+  const chatFs = Math.max(9, Math.round((Number(c.fontSize) || 12) * Math.max(0.85, eff)))
   el.chatInput.style.fontSize = chatFs + 'px'
   el.chatSend.style.fontSize = Math.max(11, chatFs + 1) + 'px'
-  const ratio = Math.min(0.85, Math.max(0.2, Number(b.maxHeightRatio) || 0.58))
+  // 窗口越小，气泡越要占满纵向空间，不然显示不下
+  const baseRatio = Number(b.maxHeightRatio) || 0.58
+  const ratio = Math.min(0.88, Math.max(0.2, s < 0.85 ? baseRatio * 1.35 : baseRatio))
   document.documentElement.style.setProperty('--bubble-max-h', Math.round(window.innerHeight * ratio) + 'px')
 }
 
@@ -474,7 +518,10 @@ async function boot() {
 
   window.pet.onState((payload) => applyState(payload))
   window.pet.onConfig((next) => { cfg = next; applyAppearance(); loadOutfit() })
-  window.pet.onResize(() => setTimeout(() => layout(true), 60))
+  window.pet.onResize((payload) => {
+    if (payload && payload.scale) currentScale = payload.scale
+    setTimeout(() => layout(true), 60)
+  })
 
   // 待机时偶尔眨眼/小动作：库自带 Idle 循环，这里只在很久没状态时把表情收回
   idleTimer = setInterval(() => {

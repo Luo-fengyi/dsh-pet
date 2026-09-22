@@ -19,7 +19,7 @@ if (process.env.DSPET_USERDATA) app.setPath('userData', process.env.DSPET_USERDA
 // 调试运行时不要动用户的 config.json
 const DEBUG_RUN = !!(process.env.DSPET_SNAP || process.env.DSPET_DEMO || process.env.DSPET_DRAGTEST ||
   process.env.DSPET_INPUTTEST || process.env.DSPET_CURSORTEST || process.env.DSPET_IDLEWATCH ||
-  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST || process.env.DSPET_CHATBOX_TEST || process.env.DSPET_OUTFIT_TEST)
+  process.env.DSPET_EGGTEST || process.env.DSPET_LOOKTEST || process.env.DSPET_CHATBOX_TEST || process.env.DSPET_OUTFIT_TEST || process.env.DSPET_BUBBLE_TEST)
 
 function loadConfig() {
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
@@ -186,6 +186,24 @@ function setupDebug() {
         await sleep(1000)
         fs.writeFileSync(path.join(outDir, 'o4-cleared.png'), (await win.webContents.capturePage()).toPNG())
       } catch (e) { appendLog('[outfit] 失败 ' + e.message) }
+      app.quit()
+    }, 9000)
+    return
+  }
+
+  // DSPET_BUBBLE_TEST=<png路径>：显示一段长文本，验证窗口缩小时气泡还能不能读全
+  if (process.env.DSPET_BUBBLE_TEST) {
+    const out = process.env.DSPET_BUBBLE_TEST
+    const text = "这是一段用来测试气泡显示能力的长文本。窗口被调小以后，气泡的宽度和高度都会跟着变小，"
+      + "如果字号不跟着缩，就会出现一行只放得下几个字、整段话被截断读不完的情况。"
+      + "现在字号会跟着窗口缩放，并且窗口越小气泡越占满纵向空间，所以这段话应该能完整显示，而不是只看到开头几句。"
+    setTimeout(async () => {
+      try {
+        await win.webContents.executeJavaScript("showBubble(" + JSON.stringify(text) + ", 60000)")
+        await new Promise((r) => setTimeout(r, 1200))
+        fs.writeFileSync(out, (await win.webContents.capturePage()).toPNG())
+        appendLog("[bubbletest] 长文本已显示")
+      } catch (e) { appendLog("[bubbletest] 失败 " + e.message) }
       app.quit()
     }, 9000)
     return
