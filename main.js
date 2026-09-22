@@ -180,6 +180,10 @@ function setupDebug() {
         try { await win.webContents.executeJavaScript('window.__eggNow && window.__eggNow()') } catch (_) {}
         await sleep(1500)
         fs.writeFileSync(path.join(outDir, 'o3-afterMotion.png'), (await win.webContents.capturePage()).toPNG())
+        // 最后清空装扮，验证旧装扮会不会残留（这是"点恢复默认没反应"的复现点）
+        try { await win.webContents.executeJavaScript('window.__setOutfit([])') } catch (_) {}
+        await sleep(1000)
+        fs.writeFileSync(path.join(outDir, 'o4-cleared.png'), (await win.webContents.capturePage()).toPNG())
       } catch (e) { appendLog('[outfit] 失败 ' + e.message) }
       app.quit()
     }, 9000)

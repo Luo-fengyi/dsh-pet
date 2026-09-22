@@ -242,7 +242,24 @@ function applyAppearance() {
 let outfitDefs = []
 let outfitLabels = []
 
+// 把上次装扮写过的参数恢复成默认值。
+// 必须做：装扮是每帧覆盖写参数的，光清空 outfitDefs 只是停止写入，
+// 参数还停在装扮值上 → 表现就是"取消装扮没反应""换了眼镜结果两副一起戴"。
+function resetOutfitParams() {
+  if (!model || !outfitDefs.length) return
+  try {
+    const core = model.internalModel.coreModel
+    for (const d of outfitDefs) {
+      const idx = core.getParameterIndex ? core.getParameterIndex(d.id) : -1
+      if (idx >= 0) core.setParameterValueByIndex(idx, core.getParameterDefaultValue(idx), 1)
+    }
+  } catch (e) {
+    console.log('[pet] 复位装扮参数失败：' + (e && e.message))
+  }
+}
+
 async function loadOutfit() {
+  resetOutfitParams()
   outfitDefs = []
   outfitLabels = []
   const o = (cfg && cfg.outfit) || {}
