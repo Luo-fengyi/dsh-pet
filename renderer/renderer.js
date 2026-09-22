@@ -265,11 +265,23 @@ async function loadOutfit() {
   const o = (cfg && cfg.outfit) || {}
   const cats = o.categories || {}
   const sel = o.selected || {}
-  const picks = []
+  // 收集要装的项，并把它声明的依赖（also）一起带上——
+  // 有些项单独装看不见效果，比如「魔爪换色」是给魔爪换颜色，得先有魔爪
+  const wanted = []
+  const push = (label) => { if (label && wanted.indexOf(label) < 0) wanted.push(label) }
   for (const key of Object.keys(cats)) {
     const label = sel[key]
-    if (label) picks.push(label)
+    if (!label) continue
+    push(label)
+    const items = cats[key].items || []
+    for (const it of items) {
+      if (typeof it === 'string') continue
+      if (it && it.label === label && Array.isArray(it.also)) {
+        for (const extra of it.also) push(extra)
+      }
+    }
   }
+  const picks = wanted
   for (const label of picks) {
     const e = (manifest && manifest.expressions || []).find((x) => x.label === label)
     if (!e) continue
@@ -307,7 +319,9 @@ window.__setOutfit = async (labels) => {
   for (const key of Object.keys(cats)) sel[key] = null
   for (const label of labels || []) {
     for (const key of Object.keys(cats)) {
-      if ((cats[key].items || []).indexOf(label) >= 0) sel[key] = label
+      // items 里可能是字符串，也可能是 { label, name } 对象
+      const items = (cats[key].items || []).map((it) => (typeof it === 'string' ? it : (it && it.label) || ''))
+      if (items.indexOf(label) >= 0) sel[key] = label
     }
   }
   cfg.outfit = Object.assign({}, cfg.outfit, { selected: sel })
