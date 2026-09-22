@@ -442,7 +442,7 @@ async function boot() {
   showBubble('DS 娘上线～', 2600)
 
   window.pet.onState((payload) => applyState(payload))
-  window.pet.onConfig((next) => { cfg = next; applyAppearance() })
+  window.pet.onConfig((next) => { cfg = next; applyAppearance(); loadOutfit() })
   window.pet.onResize(() => setTimeout(() => layout(true), 60))
 
   // 待机时偶尔眨眼/小动作：库自带 Idle 循环，这里只在很久没状态时把表情收回

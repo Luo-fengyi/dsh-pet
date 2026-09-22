@@ -59,6 +59,67 @@ function fill(s) {
   $('bubbleMinSec').value = Math.round((a.bubbleMinMs || 6000) / 1000)
   $('bubbleMaxSec').value = Math.round((a.bubbleMaxMs || 40000) / 1000)
   $('topRefreshMs').value = a.topRefreshMs === undefined ? 2000 : a.topRefreshMs
+  renderOutfit(s)
+}
+
+// ---- 装扮 ----
+let outfitCats = {}
+
+function renderOutfit(s) {
+  const o = (s && s.outfit) || {}
+  outfitCats = o.categories || {}
+  const sel = o.selected || {}
+  $('outfitRandom').checked = o.startupRandom !== false
+  const box = $('outfitCats')
+  box.innerHTML = ''
+  const keys = Object.keys(outfitCats)
+  if (!keys.length) {
+    box.innerHTML = '<div class="empty">config.json 的 outfit.categories 里没有分类</div>'
+    return
+  }
+  for (const key of keys) {
+    const cat = outfitCats[key] || {}
+    const row = document.createElement('div')
+    row.className = 'row'
+    const lab = document.createElement('label')
+    lab.textContent = cat.label || key
+    const ctl = document.createElement('div')
+    ctl.className = 'ctl'
+    const select = document.createElement('select')
+    select.dataset.cat = key
+    const none = document.createElement('option')
+    none.value = ''
+    none.textContent = '（不装）'
+    select.appendChild(none)
+    for (const item of cat.items || []) {
+      const op = document.createElement('option')
+      op.value = item
+      op.textContent = item
+      select.appendChild(op)
+    }
+    select.value = sel[key] || ''
+    ctl.appendChild(select)
+    row.appendChild(lab)
+    row.appendChild(ctl)
+    box.appendChild(row)
+  }
+  console.log('[settings] 装扮分类 ' + keys.length + ' 个：' +
+    keys.map((k) => (outfitCats[k].label || k) + '(' + ((outfitCats[k].items || []).length) + ')').join(' ') +
+    '  当前选中：' + (Object.keys(sel).map((k) => sel[k]).filter(Boolean).join('、') || '无'))
+}
+
+function collectOutfit() {
+  const sel = {}
+  for (const el of document.querySelectorAll('#outfitCats select')) {
+    sel[el.dataset.cat] = el.value || null
+  }
+  return { startupRandom: $('outfitRandom').checked, selected: sel }
+}
+
+function syncOutfitUi(sel) {
+  for (const el of document.querySelectorAll('#outfitCats select')) {
+    el.value = (sel && sel[el.dataset.cat]) || ''
+  }
 }
 
 function collect() {
@@ -100,6 +161,7 @@ function collect() {
       bubbleMaxMs: Math.max(2, num('bubbleMaxSec', 40)) * 1000,
       topRefreshMs: Math.max(0, num('topRefreshMs', 2000)),
     },
+    outfit: collectOutfit(),
   }
 }
 
@@ -183,6 +245,28 @@ $('clearMemory').addEventListener('click', async () => {
 })
 
 $('refreshHistory').addEventListener('click', () => loadHistory())
+
+// 随机换一套：主进程会立刻写盘并通知桌宠，所以不用点保存
+$('outfitRoll').addEventListener('click', async () => {
+  try {
+    const sel = await window.pet.outfitRandom()
+    syncOutfitUi(sel)
+    const picked = Object.keys(sel || {}).map((k) => sel[k]).filter(Boolean)
+    say('随机了一套：' + (picked.join('、') || '（什么都没装）'), 'ok')
+  } catch (e) {
+    say('随机失败：' + (e && e.message ? e.message : e), 'err')
+  }
+})
+
+$('outfitClear').addEventListener('click', async () => {
+  try {
+    await window.pet.outfitReset()
+    syncOutfitUi({})
+    say('已恢复默认（不装扮）', 'ok')
+  } catch (e) {
+    say('操作失败：' + (e && e.message ? e.message : e), 'err')
+  }
+})
 
 $('clearHistory').addEventListener('click', async () => {
   await window.pet.newSession()
